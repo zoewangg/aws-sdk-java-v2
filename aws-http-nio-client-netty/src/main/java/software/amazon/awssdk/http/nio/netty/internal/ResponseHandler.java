@@ -29,7 +29,9 @@ import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.LastHttpContent;
+import io.netty.util.AttributeKey;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,12 @@ import software.amazon.awssdk.utils.Logger;
 
 @Sharable
 class ResponseHandler extends SimpleChannelInboundHandler<HttpObject> {
+
+    /**
+     * {@link AttributeKey} to keep track of whether we should close the connection after this request
+     * has completed.
+     */
+    private static final AttributeKey<Boolean> KEEP_ALIVE = AttributeKey.newInstance("KeepAlive");
 
     private static final Logger log = Logger.loggerFor(ResponseHandler.class);
 
@@ -55,6 +63,7 @@ class ResponseHandler extends SimpleChannelInboundHandler<HttpObject> {
                                                              .statusCode(response.status().code())
                                                              .statusText(response.status().reasonPhrase())
                                                              .build();
+            channelContext.channel().attr(KEEP_ALIVE).set(HttpUtil.isKeepAlive(response));
             requestContext.handler().headersReceived(sdkResponse);
         }
 
@@ -70,6 +79,9 @@ class ResponseHandler extends SimpleChannelInboundHandler<HttpObject> {
             }
             if (msg instanceof LastHttpContent) {
                 channelContext.pipeline().remove(publisher);
+                if (!channelContext.channel().attr(KEEP_ALIVE).get()) {
+                    channelContext.channel().close();
+                }
                 requestContext.channelPool().release(channelContext.channel());
             }
         }
