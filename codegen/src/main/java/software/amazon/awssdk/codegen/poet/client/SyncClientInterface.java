@@ -22,6 +22,7 @@ import static software.amazon.awssdk.codegen.poet.client.AsyncClientInterface.ST
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeSpec.Builder;
@@ -89,12 +90,14 @@ public final class SyncClientInterface implements ClassSpec {
 
     private MethodSpec create() {
         return MethodSpec.methodBuilder("create")
-                 .returns(className)
-                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                 .addJavadoc("Create a {@link $T} with the region loaded from the {@link $T} and credentials loaded from the "
-                             + "{@link $T}.", className, DefaultAwsRegionProviderChain.class, DefaultCredentialsProvider.class)
-                 .addStatement("return builder().build()")
-                 .build();
+                         .returns(className)
+                         .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+                         .addJavadoc(
+                                 "Create a {@link $T} with the region loaded from the {@link $T} and credentials loaded from the "
+                                 + "{@link $T}.", className, DefaultAwsRegionProviderChain.class,
+                                 DefaultCredentialsProvider.class)
+                         .addStatement("return builder().build()")
+                         .build();
     }
 
     private MethodSpec builder() {
@@ -128,9 +131,10 @@ public final class SyncClientInterface implements ClassSpec {
     }
 
     // TODO This is inconsistent with how async client reuses method signature
-    public static MethodSpec.Builder operationMethodSignature(IntermediateModel model, OperationModel opModel) {
-        TypeName returnType = opModel.hasStreamingOutput() ? STREAMING_TYPE_VARIABLE :
-                ClassName.get(model.getMetadata().getFullModelPackageName(), opModel.getReturnType().getReturnType());
+    static MethodSpec.Builder operationMethodSignature(IntermediateModel model, OperationModel opModel) {
+        TypeName responseType = ClassName.get(model.getMetadata().getFullModelPackageName(),
+                                              opModel.getReturnType().getReturnType());
+        TypeName returnType = opModel.hasStreamingOutput() ? STREAMING_TYPE_VARIABLE : responseType;
         ClassName requestType = ClassName.get(model.getMetadata().getFullModelPackageName(),
                                               opModel.getInput().getVariableType());
 
@@ -146,7 +150,9 @@ public final class SyncClientInterface implements ClassSpec {
         }
         if (opModel.hasStreamingOutput()) {
             method.addTypeVariable(STREAMING_TYPE_VARIABLE);
-            method.addParameter(ClassName.get(StreamingResponseHandler.class), "streamingHandler");
+            ParameterizedTypeName streamingResponseHandlerType = ParameterizedTypeName
+                    .get(ClassName.get(StreamingResponseHandler.class), responseType, STREAMING_TYPE_VARIABLE);
+            method.addParameter(streamingResponseHandlerType, "streamingHandler");
         }
         return method;
     }

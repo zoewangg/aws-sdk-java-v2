@@ -4,12 +4,15 @@ import java.util.concurrent.CompletableFuture;
 import javax.annotation.Generated;
 import software.amazon.awssdk.AmazonServiceException;
 import software.amazon.awssdk.annotation.SdkInternalApi;
+import software.amazon.awssdk.async.AsyncRequestProvider;
+import software.amazon.awssdk.async.AsyncResponseHandler;
 import software.amazon.awssdk.client.AsyncClientHandler;
 import software.amazon.awssdk.client.AwsAsyncClientParams;
 import software.amazon.awssdk.client.ClientExecutionParams;
 import software.amazon.awssdk.client.ClientHandlerParams;
 import software.amazon.awssdk.client.SdkAsyncClientHandler;
 import software.amazon.awssdk.http.HttpResponseHandler;
+import software.amazon.awssdk.http.async.SdkHttpResponseHandler;
 import software.amazon.awssdk.protocol.json.JsonClientMetadata;
 import software.amazon.awssdk.protocol.json.JsonErrorResponseMetadata;
 import software.amazon.awssdk.protocol.json.JsonErrorShapeMetadata;
@@ -20,10 +23,18 @@ import software.amazon.awssdk.services.json.model.APostOperationResponse;
 import software.amazon.awssdk.services.json.model.APostOperationWithOutputRequest;
 import software.amazon.awssdk.services.json.model.APostOperationWithOutputResponse;
 import software.amazon.awssdk.services.json.model.InvalidInputException;
+import software.amazon.awssdk.services.json.model.StreamingInputOperationRequest;
+import software.amazon.awssdk.services.json.model.StreamingInputOperationResponse;
+import software.amazon.awssdk.services.json.model.StreamingOutputOperationRequest;
+import software.amazon.awssdk.services.json.model.StreamingOutputOperationResponse;
 import software.amazon.awssdk.services.json.transform.APostOperationRequestMarshaller;
 import software.amazon.awssdk.services.json.transform.APostOperationResponseUnmarshaller;
 import software.amazon.awssdk.services.json.transform.APostOperationWithOutputRequestMarshaller;
 import software.amazon.awssdk.services.json.transform.APostOperationWithOutputResponseUnmarshaller;
+import software.amazon.awssdk.services.json.transform.StreamingInputOperationRequestMarshaller;
+import software.amazon.awssdk.services.json.transform.StreamingInputOperationResponseUnmarshaller;
+import software.amazon.awssdk.services.json.transform.StreamingOutputOperationRequestMarshaller;
+import software.amazon.awssdk.services.json.transform.StreamingOutputOperationResponseUnmarshaller;
 
 /**
  * Internal implementation of {@link JsonAsyncClient}.
@@ -118,6 +129,66 @@ final class DefaultJsonAsyncClient implements JsonAsyncClient {
                                  .withInput(aPostOperationWithOutputRequest));
     }
 
+    /**
+     * Some operation with a streaming input
+     *
+     * @param streamingInputOperationRequest
+     * @param requestProvider
+     *        Functional interface that can be implemented to produce the request content in a non-blocking manner. The
+     *        size of the content is expected to be known up front. See {@link AsyncRequestProvider} for specific
+     *        details on implementing this interface as well as links to precanned implementations for common scenarios
+     *        like uploading from a file. The service documentation for the request content is as follows 'This be a
+     *        stream'.
+     * @return A Java Future containing the result of the StreamingInputOperation operation returned by the service.
+     * @sample JsonAsyncClient.StreamingInputOperation
+     * @see <a href="http://docs.aws.amazon.com/goto/WebAPI/json-service-2010-05-08/StreamingInputOperation"
+     *      target="_top">AWS API Documentation</a>
+     */
+    @Override
+    public CompletableFuture<StreamingInputOperationResponse> streamingInputOperation(
+            StreamingInputOperationRequest streamingInputOperationRequest, AsyncRequestProvider requestProvider) {
+
+        HttpResponseHandler<StreamingInputOperationResponse> responseHandler = protocolFactory.createResponseHandler(
+                new JsonOperationMetadata().withPayloadJson(true), new StreamingInputOperationResponseUnmarshaller());
+
+        HttpResponseHandler<AmazonServiceException> errorResponseHandler = createErrorResponseHandler();
+
+        return clientHandler.execute(new ClientExecutionParams<StreamingInputOperationRequest, StreamingInputOperationResponse>()
+                                             .withMarshaller(new StreamingInputOperationRequestMarshaller(protocolFactory))
+                                             .withResponseHandler(responseHandler).withErrorResponseHandler(errorResponseHandler)
+                                             .withAsyncRequestProvider(requestProvider).withInput(streamingInputOperationRequest));
+    }
+
+    /**
+     * Some operation with a streaming output
+     *
+     * @param streamingOutputOperationRequest
+     * @param asyncResponseHandler
+     *        The response handler for processing the streaming response in a non-blocking manner. See
+     *        {@link AsyncResponseHandler} for details on how this callback should be implemented and for links to
+     *        precanned implementations for common scenarios like downloading to a file. The service documentation for
+     *        the streamed content is as follows 'This be a stream'.
+     * @return A future to the transformed result of the AsyncResponseHandler.
+     * @sample JsonAsyncClient.StreamingOutputOperation
+     * @see <a href="http://docs.aws.amazon.com/goto/WebAPI/json-service-2010-05-08/StreamingOutputOperation"
+     *      target="_top">AWS API Documentation</a>
+     */
+    @Override
+    public <ReturnT> CompletableFuture<ReturnT> streamingOutputOperation(
+            StreamingOutputOperationRequest streamingOutputOperationRequest,
+            AsyncResponseHandler<StreamingOutputOperationResponse, ReturnT> asyncResponseHandler) {
+
+        SdkHttpResponseHandler<ReturnT> responseHandler = protocolFactory.createAsyncStreamingResponseHandler(
+                new StreamingOutputOperationResponseUnmarshaller(), asyncResponseHandler);
+
+        HttpResponseHandler<AmazonServiceException> errorResponseHandler = createErrorResponseHandler();
+
+        return clientHandler.execute(new ClientExecutionParams<StreamingOutputOperationRequest, ReturnT>()
+                                             .withMarshaller(new StreamingOutputOperationRequestMarshaller(protocolFactory))
+                                             .withAsyncResponseHandler(responseHandler).withErrorResponseHandler(errorResponseHandler)
+                                             .withInput(streamingOutputOperationRequest));
+    }
+
     @Override
     public void close() throws Exception {
         clientHandler.close();
@@ -129,6 +200,7 @@ final class DefaultJsonAsyncClient implements JsonAsyncClient {
                                                   .withSupportsCbor(false)
                                                   .withSupportsIon(false)
                                                   .withBaseServiceExceptionClass(software.amazon.awssdk.services.json.model.JsonException.class)
+                                                  .withContentTypeOverride("")
                                                   .addErrorMetadata(
                                                           new JsonErrorShapeMetadata().withErrorCode("InvalidInput").withModeledClass(InvalidInputException.class)));
     }

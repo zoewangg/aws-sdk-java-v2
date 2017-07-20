@@ -79,7 +79,6 @@ public class SyncClientClass implements ClassSpec {
             classBuilder.addMethod(constructor());
         }
 
-
         protocolSpec.createErrorResponseHandler().ifPresent(classBuilder::addMethod);
 
         classBuilder.addMethod(protocolSpec.initProtocolFactory(model));
