@@ -61,6 +61,7 @@
                             <include>commons-codec:commons-codec</include>
                             <include>software.amazon.awssdk.ion:ion-java</include>
                             <include>commons-logging:commons-logging</include>
+                            <include>com.typesafe.netty:*</include>
                             <include>software.amazon.awssdk:*</include>
                         </includes>
                     </artifactSet>

@@ -56,7 +56,10 @@
         <dependency>
             <groupId>com.typesafe.netty</groupId>
             <artifactId>netty-reactive-streams</artifactId>
-            <version>1.0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.netty</groupId>
+            <artifactId>netty-reactive-streams-http</artifactId>
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
