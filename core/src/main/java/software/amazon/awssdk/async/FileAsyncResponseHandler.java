@@ -65,7 +65,9 @@ class FileAsyncResponseHandler<ResponseT> implements AsyncResponseHandler<Respon
     @Override
     public void exceptionOccurred(Throwable throwable) {
         try {
-            invokeSafely(fileChannel::close);
+            if (fileChannel != null) {
+                invokeSafely(fileChannel::close);
+            }
         } catch (RuntimeException e) {
             path.toFile().delete();
             throw e;

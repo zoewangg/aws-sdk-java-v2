@@ -19,6 +19,8 @@ import static software.amazon.awssdk.event.SdkProgressPublisher.publishProgress;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import software.amazon.awssdk.RequestExecutionContext;
 import software.amazon.awssdk.Response;
@@ -46,6 +48,8 @@ import software.amazon.awssdk.http.pipeline.RequestPipeline;
  */
 public class MakeAsyncHttpRequestStage<OutputT>
         implements RequestPipeline<SdkHttpFullRequest, CompletableFuture<Response<OutputT>>> {
+
+    private static final Log log = LogFactory.getLog(MakeAsyncHttpRequestStage.class);
 
     private final SdkAsyncHttpClient sdkAsyncHttpClient;
     private final SdkHttpResponseHandler<OutputT> responseHandler;
@@ -85,8 +89,8 @@ public class MakeAsyncHttpRequestStage<OutputT>
         SdkHttpFullRequest requestWithContentLength = getRequestWithContentLength(request, requestProvider);
 
         sdkAsyncHttpClient.prepareRequest(requestWithContentLength, SdkRequestContext.builder()
-                                                                    .metrics(context.awsRequestMetrics())
-                                                                    .build(),
+                                                                                     .metrics(context.awsRequestMetrics())
+                                                                                     .build(),
                                           requestProvider,
                                           handler)
                           .run();
@@ -162,17 +166,27 @@ public class MakeAsyncHttpRequestStage<OutputT>
 
         @Override
         public void exceptionOccurred(Throwable throwable) {
-            responseHandler.exceptionOccurred(throwable);
+            try {
+                responseHandler.exceptionOccurred(throwable);
+            } catch (Exception e) {
+                log.error("Error thrown from AsyncResponseHandler#exceptionOcurred", e);
+            }
             future.completeExceptionally(throwable);
         }
 
         @Override
         public Response<OutputT> complete() {
-            publishProgress(listener, ProgressEventType.HTTP_REQUEST_COMPLETED_EVENT);
-            final HttpResponse httpResponse = SdkHttpResponseAdapter.adapt(false, request, (SdkHttpFullResponse) response);
-            Response<OutputT> toReturn = handleResponse(httpResponse);
-            future.complete(toReturn);
-            return toReturn;
+            try {
+                publishProgress(listener, ProgressEventType.HTTP_REQUEST_COMPLETED_EVENT);
+                HttpResponse httpResponse = SdkHttpResponseAdapter.adapt(false, request, (SdkHttpFullResponse) response);
+                Response<OutputT> toReturn = handleResponse(httpResponse);
+                future.complete(toReturn);
+                return toReturn;
+            } catch (Exception e) {
+                // TODO do we need to wrap this with anything?
+                future.completeExceptionally(e);
+                throw e;
+            }
         }
 
         /**

@@ -17,6 +17,7 @@ package software.amazon.awssdk.http.nio.netty.internal;
 
 import static software.amazon.awssdk.http.nio.netty.internal.ChannelAttributeKeys.REQUEST_CONTEXT_KEY;
 
+import com.typesafe.netty.http.HttpStreamsClientHandler;
 import com.typesafe.netty.http.StreamedHttpRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -52,6 +53,8 @@ public final class RunnableRequest implements AbortableRunnable {
         context.channelPool().acquire().addListener((Future<Channel> channelFuture) -> {
             if (channelFuture.isSuccess()) {
                 channel = channelFuture.getNow();
+                channel.pipeline().addLast(new HttpStreamsClientHandler());
+                channel.pipeline().addLast(new ResponseHandler());
                 channel.attr(REQUEST_CONTEXT_KEY).set(context);
                 makeRequest(context.nettyRequest());
             } else {

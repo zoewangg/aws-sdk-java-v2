@@ -73,7 +73,7 @@ final class NettyNioAsyncHttpClient implements SdkAsyncHttpClient {
         this.group = factory.eventLoopGroupConfiguration().toEither()
                             .map(e -> e.map(NonManagedEventLoopGroup::new,
                                             EventLoopGroupFactory::create))
-                            .orElse(SharedEventLoopGroup.get());
+                            .orElseGet(SharedEventLoopGroup::get);
         this.pools = createChannelPoolMap(serviceDefaults,
                                           factory.maxConnectionsPerEndpoint().orElse(serviceDefaults.getMaxConnections()));
     }
@@ -128,12 +128,8 @@ final class NettyNioAsyncHttpClient implements SdkAsyncHttpClient {
         // Keep unwrapping until it's not a DelegatingEventLoopGroup
         while (unwrapped instanceof DelegatingEventLoopGroup) {
             unwrapped = ((DelegatingEventLoopGroup) unwrapped).getDelegate();
-            if (unwrapped instanceof EpollEventLoopGroup) {
-                return EpollSocketChannel.class;
-            }
         }
-        // None of the wrapped event loop groups were Epoll so assume Nio.
-        return NioSocketChannel.class;
+        return unwrapped instanceof EpollEventLoopGroup ? EpollSocketChannel.class : NioSocketChannel.class;
     }
 
     private static URI stripPath(URI uri) {

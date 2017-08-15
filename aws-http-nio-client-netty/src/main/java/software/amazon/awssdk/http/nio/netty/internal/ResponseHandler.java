@@ -19,6 +19,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static software.amazon.awssdk.http.nio.netty.internal.ChannelAttributeKeys.REQUEST_CONTEXT_KEY;
 
+import com.typesafe.netty.http.HttpStreamsClientHandler;
 import com.typesafe.netty.http.StreamedHttpResponse;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -122,6 +123,8 @@ class ResponseHandler extends SimpleChannelInboundHandler<HttpObject> {
                     if (!channelContext.channel().attr(KEEP_ALIVE).get()) {
                         channelContext.channel().close();
                     }
+                    channelContext.pipeline().remove(HttpStreamsClientHandler.class);
+                    channelContext.pipeline().remove(ResponseHandler.class);
                     requestContext.channelPool().release(channelContext.channel());
                 }
             });

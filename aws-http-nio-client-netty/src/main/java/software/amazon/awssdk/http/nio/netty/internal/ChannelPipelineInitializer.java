@@ -15,7 +15,6 @@
 
 package software.amazon.awssdk.http.nio.netty.internal;
 
-import com.typesafe.netty.http.HttpStreamsClientHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
@@ -42,7 +41,7 @@ public class ChannelPipelineInitializer extends AbstractChannelPoolHandler {
         if (log.isLoggingLevelEnabled("debug")) {
             tmpHandlers.add(new LoggingHandler(log::debug));
         }
-        tmpHandlers.add(new ResponseHandler());
+        //        tmpHandlers.add(new ResponseHandler());
 
         handlers = tmpHandlers.toArray(new ChannelHandler[0]);
     }
@@ -62,8 +61,8 @@ public class ChannelPipelineInitializer extends AbstractChannelPoolHandler {
         }
 
         p.addLast(new HttpClientCodec());
-        p.addLast(new HttpStreamsClientHandler());
-        p.addLast(handlers);
+        //        p.addLast(new HttpStreamsClientHandler());
+        //        p.addLast(handlers);
         // Disabling auto-read is needed for backpressure to work
         ch.config().setOption(ChannelOption.AUTO_READ, false);
     }
