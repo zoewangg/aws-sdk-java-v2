@@ -94,9 +94,7 @@ final class NettyNioAsyncHttpClient implements SdkAsyncHttpClient {
                                 .remoteAddress(addressFor(key));
                 SslContext sslContext = sslContext(key.getScheme());
                 return new FixedChannelPool(bootstrap,
-                                            new ChannelPipelineInitializer(sslContext),
-                                            ChannelHealthChecker.ACTIVE, FixedChannelPool.AcquireTimeoutAction.FAIL,
-                                            100, maxConnectionsPerEndpoint, 1000, true);
+                                            new ChannelPipelineInitializer(sslContext), maxConnectionsPerEndpoint);
             }
         };
     }
