@@ -17,8 +17,12 @@ package software.amazon.awssdk.http.nio.netty.internal;
 
 import static software.amazon.awssdk.utils.StringUtils.isNotBlank;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.DefaultHttpRequest;
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
@@ -26,6 +30,8 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringEncoder;
 import software.amazon.awssdk.http.SdkHttpMethod;
 import software.amazon.awssdk.http.SdkHttpRequest;
+import software.amazon.awssdk.http.async.SdkHttpRequestProvider;
+import software.amazon.awssdk.http.async.SimpleSubscriber;
 
 public final class RequestAdapter {
 
@@ -34,6 +40,18 @@ public final class RequestAdapter {
         HttpMethod method = toNettyHttpMethod(sdkRequest.getHttpMethod());
         HttpHeaders headers = new DefaultHttpHeaders();
         DefaultHttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, method, uri, headers);
+        sdkRequest.getHeaders().forEach(request.headers()::add);
+        return request;
+    }
+
+    public FullHttpRequest adapt(SdkHttpRequest sdkRequest, SdkHttpRequestProvider requestProvider) {
+        String uri = uriFrom(sdkRequest);
+        HttpMethod method = toNettyHttpMethod(sdkRequest.getHttpMethod());
+        ByteBuf buf = Unpooled.buffer();
+        requestProvider.subscribe(new SimpleSubscriber(buf::writeBytes));
+        HttpHeaders headers = new DefaultHttpHeaders();
+        FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uri, buf,
+                                                             headers, new DefaultHttpHeaders());
         sdkRequest.getHeaders().forEach(request.headers()::add);
         return request;
     }

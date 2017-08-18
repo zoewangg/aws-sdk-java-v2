@@ -64,6 +64,7 @@
         <module>http-client-spi</module>
         <module>aws-http-client-apache</module>
         <module>aws-http-nio-client-netty</module>
+        <!-- <module>aws&#45;http&#45;async&#45;netty</module> -->
         <module>codegen-maven-plugin</module>
         <module>jmespath-java</module>
         <module>bundle</module>
@@ -121,6 +122,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.asynchttpclient</groupId>
+                <artifactId>async-http-client</artifactId>
+                <version>2.0.34</version>
+            </dependency>
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
                 <artifactId>jmespath-java</artifactId>

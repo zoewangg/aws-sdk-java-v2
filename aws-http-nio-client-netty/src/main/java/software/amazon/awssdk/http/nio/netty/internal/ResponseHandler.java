@@ -17,6 +17,7 @@ package software.amazon.awssdk.http.nio.netty.internal;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
+import static software.amazon.awssdk.http.nio.netty.internal.ChannelAttributeKeys.PUBLISHER_KEY;
 import static software.amazon.awssdk.http.nio.netty.internal.ChannelAttributeKeys.REQUEST_CONTEXT_KEY;
 
 import com.typesafe.netty.http.HttpStreamsClientHandler;
@@ -27,7 +28,9 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpObject;
+import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpUtil;
+import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.util.AttributeKey;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -55,8 +58,8 @@ class ResponseHandler extends SimpleChannelInboundHandler<HttpObject> {
     protected void channelRead0(ChannelHandlerContext channelContext, HttpObject msg) throws Exception {
         RequestContext requestContext = channelContext.channel().attr(REQUEST_CONTEXT_KEY).get();
 
-        if (msg instanceof StreamedHttpResponse) {
-            StreamedHttpResponse response = (StreamedHttpResponse) msg;
+        if (msg instanceof HttpResponse) {
+            HttpResponse response = (HttpResponse) msg;
             SdkHttpResponse sdkResponse = SdkHttpFullResponse.builder()
                                                              .headers(fromNettyHeaders(response.headers()))
                                                              .statusCode(response.status().code())
@@ -64,7 +67,55 @@ class ResponseHandler extends SimpleChannelInboundHandler<HttpObject> {
                                                              .build();
             channelContext.channel().attr(KEEP_ALIVE).set(HttpUtil.isKeepAlive(response));
             requestContext.handler().headersReceived(sdkResponse);
-            requestContext.handler().onStream(new PublisherAdapter(response, channelContext, requestContext));
+        }
+        if (channelContext.channel().attr(PUBLISHER_KEY).get() == null) {
+            requestContext.handler().onStream(new Publisher<ByteBuffer>() {
+                @Override
+                public void subscribe(Subscriber<? super ByteBuffer> subscriber) {
+                    channelContext.channel().attr(ChannelAttributeKeys.PUBLISHER_KEY).set(new Subscriber<ByteBuffer>() {
+                        @Override
+                        public void onSubscribe(Subscription subscription) {
+                            subscriber.onSubscribe(subscription);
+                        }
+
+                        @Override
+                        public void onNext(ByteBuffer byteBuffer) {
+                            subscriber.onNext(byteBuffer);
+
+                        }
+
+                        @Override
+                        public void onError(Throwable throwable) {
+                            subscriber.onError(throwable);
+                        }
+
+                        @Override
+                        public void onComplete() {
+                            subscriber.onComplete();
+                            requestContext.handler().complete();
+                        }
+                    });
+                }
+            });
+        }
+
+        if (msg instanceof HttpContent) {
+            HttpContent content = (HttpContent) msg;
+            if (content.content().readableBytes() > 0) {
+                channelContext.channel().attr(ChannelAttributeKeys.PUBLISHER_KEY).get()
+                              .onNext(content.content().nioBuffer());
+            }
+            if (msg instanceof LastHttpContent) {
+                try {
+                    channelContext.channel().attr(ChannelAttributeKeys.PUBLISHER_KEY).get()
+                                  .onComplete();
+                    if (!channelContext.channel().attr(KEEP_ALIVE).get()) {
+                        channelContext.channel().close();
+                    }
+                } finally {
+                    requestContext.channelPool().release(channelContext.channel());
+                }
+            }
         }
     }
 
@@ -73,6 +124,7 @@ class ResponseHandler extends SimpleChannelInboundHandler<HttpObject> {
         RequestContext requestContext = ctx.channel().attr(REQUEST_CONTEXT_KEY).get();
         log.error(() -> "Exception processing request: " + requestContext.sdkRequest(), cause);
         requestContext.handler().exceptionOccurred(cause);
+        requestContext.channelPool().close();
         requestContext.channelPool().release(ctx.channel());
         ctx.fireExceptionCaught(cause);
     }

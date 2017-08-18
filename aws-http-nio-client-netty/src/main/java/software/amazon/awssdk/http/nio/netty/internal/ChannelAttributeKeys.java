@@ -15,7 +15,10 @@
 
 package software.amazon.awssdk.http.nio.netty.internal;
 
+import com.typesafe.netty.HandlerPublisher;
 import io.netty.util.AttributeKey;
+import java.nio.ByteBuffer;
+import org.reactivestreams.Subscriber;
 
 /**
  * Keys for attributes attached via {@link io.netty.channel.Channel#attr(AttributeKey)}.
@@ -26,6 +29,18 @@ class ChannelAttributeKeys {
      * Attribute key for {@link RequestContext}.
      */
     static final AttributeKey<RequestContext> REQUEST_CONTEXT_KEY = AttributeKey.newInstance("requestContext");
+
+
+    /**
+     * Attribute key for {@link HandlerPublisher}.
+     */
+    static final AttributeKey<Subscriber<? super ByteBuffer>> PUBLISHER_KEY = AttributeKey.newInstance("publisher");
+
+    /**
+     * Boolean to indicate whether {@link software.amazon.awssdk.http.async.SdkHttpResponseHandler#onStream(Publisher)} has
+     * been called yet. We call it when we receive the first {@link io.netty.handler.codec.http.HttpContent}.
+     */
+    static final AttributeKey<Boolean> HAS_CALLED_ON_STREAM = AttributeKey.newInstance("hasCalledOnStream");
 
     private ChannelAttributeKeys() {
     }

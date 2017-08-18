@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.awssdk.http.nio.netty.internal;
+package software.amazon.awssdk.http.async.netty.internal;
 
 import java.io.File;
 import java.io.FileOutputStream;

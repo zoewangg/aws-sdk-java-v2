@@ -30,6 +30,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.pool.AbstractChannelPoolMap;
+import io.netty.channel.pool.ChannelHealthChecker;
 import io.netty.channel.pool.ChannelPool;
 import io.netty.channel.pool.ChannelPoolMap;
 import io.netty.channel.pool.FixedChannelPool;
@@ -88,10 +89,14 @@ final class NettyNioAsyncHttpClient implements SdkAsyncHttpClient {
                                 .group(group)
                                 .channel(resolveSocketChannelClass())
                                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, serviceDefaults.getConnectionTimeout())
+                                .option(ChannelOption.SO_REUSEADDR, true)
+                                .option(ChannelOption.TCP_NODELAY, true)
                                 .remoteAddress(addressFor(key));
                 SslContext sslContext = sslContext(key.getScheme());
                 return new FixedChannelPool(bootstrap,
-                                            new ChannelPipelineInitializer(sslContext), maxConnectionsPerEndpoint);
+                                            new ChannelPipelineInitializer(sslContext),
+                                            ChannelHealthChecker.ACTIVE, FixedChannelPool.AcquireTimeoutAction.FAIL,
+                                            100, maxConnectionsPerEndpoint, 1000, true);
             }
         };
     }
@@ -103,7 +108,7 @@ final class NettyNioAsyncHttpClient implements SdkAsyncHttpClient {
                                             SdkHttpResponseHandler handler) {
         final RequestContext context = new RequestContext(pools.get(stripPath(sdkRequest.getEndpoint())),
                                                           sdkRequest, requestProvider,
-                                                          requestAdapter.adapt(sdkRequest),
+                                                          requestAdapter.adapt(sdkRequest, requestProvider),
                                                           handler);
         return new RunnableRequest(context);
     }
