@@ -131,6 +131,10 @@ public class Utils {
                                         Constants.PACKAGE_NAME_TRANSFORM_PATTERN);
     }
 
+    public static String getPaginatorsPackageName(String serviceName, CustomizationConfig customizationConfig) {
+        return getCustomizedPackageName(serviceName, Constants.PACKAGE_NAME_PAGINATORS_PATTERN);
+    }
+
     public static String getSmokeTestPackageName(String serviceName, CustomizationConfig customizationConfig) {
         return getCustomizedPackageName(serviceName,
                                         Constants.PACKAGE_NAME_SMOKE_TEST_PATTERN);

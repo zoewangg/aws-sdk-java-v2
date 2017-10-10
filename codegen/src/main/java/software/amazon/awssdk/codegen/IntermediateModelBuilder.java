@@ -43,6 +43,7 @@ import software.amazon.awssdk.codegen.model.intermediate.ServiceExamples;
 import software.amazon.awssdk.codegen.model.intermediate.ShapeModel;
 import software.amazon.awssdk.codegen.model.service.AuthType;
 import software.amazon.awssdk.codegen.model.service.Operation;
+import software.amazon.awssdk.codegen.model.service.Paginators;
 import software.amazon.awssdk.codegen.model.service.ServiceModel;
 import software.amazon.awssdk.codegen.naming.DefaultNamingStrategy;
 import software.amazon.awssdk.codegen.naming.NamingStrategy;
@@ -62,6 +63,7 @@ public class IntermediateModelBuilder {
     private final NamingStrategy namingStrategy;
     private final TypeUtils typeUtils;
     private final List<IntermediateModelShapeProcessor> shapeProcessors;
+    private final Paginators paginators;
 
     public IntermediateModelBuilder(C2jModels models) {
         this.customConfig = models.customizationConfig();
@@ -71,6 +73,7 @@ public class IntermediateModelBuilder {
         this.namingStrategy = new DefaultNamingStrategy(service, customConfig);
         this.typeUtils = new TypeUtils(namingStrategy);
         this.shapeProcessors = createShapeProcessors();
+        this.paginators = models.paginatorsModel();
     }
 
 
@@ -117,7 +120,7 @@ public class IntermediateModelBuilder {
 
         IntermediateModel fullModel = new IntermediateModel(
             constructMetadata(service, codeGenConfig, customConfig), operations, shapes,
-            customConfig, examples, authorizers);
+            customConfig, examples, authorizers, paginators.getPaginators());
 
         customization.postprocess(fullModel);
 
@@ -132,7 +135,8 @@ public class IntermediateModelBuilder {
                                                                trimmedShapes,
                                                                fullModel.getCustomizationConfig(),
                                                                fullModel.getExamples(),
-                                                               fullModel.getCustomAuthorizers());
+                                                               fullModel.getCustomAuthorizers(),
+                                                               fullModel.getPaginators());
 
         linkMembersToShapes(trimmedModel);
         linkOperationsToInputOutputShapes(trimmedModel);
@@ -256,4 +260,7 @@ public class IntermediateModelBuilder {
         return typeUtils;
     }
 
+    public Paginators getPaginators() {
+        return paginators;
+    }
 }
