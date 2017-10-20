@@ -13,11 +13,12 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.awssdk.core.retry.v2;
+package software.amazon.awssdk.core.retry;
 
 import software.amazon.awssdk.annotations.Immutable;
 import software.amazon.awssdk.annotations.SdkInternalApi;
 import software.amazon.awssdk.core.SdkBaseException;
+import software.amazon.awssdk.core.http.ExecutionContext;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 
 /**
@@ -30,17 +31,20 @@ public class RetryPolicyContext {
     private final Object originalRequest;
     private final SdkHttpFullRequest request;
     private final SdkBaseException exception;
+    private final ExecutionContext executionContext;
     private final int retriesAttempted;
     private final Integer httpStatusCode;
 
     private RetryPolicyContext(Object originalRequest,
                                SdkHttpFullRequest request,
                                SdkBaseException exception,
+                               ExecutionContext executionContext,
                                int retriesAttempted,
                                Integer httpStatusCode) {
         this.originalRequest = originalRequest;
         this.request = request;
         this.exception = exception;
+        this.executionContext = executionContext;
         this.retriesAttempted = retriesAttempted;
         this.httpStatusCode = httpStatusCode;
     }
@@ -58,8 +62,7 @@ public class RetryPolicyContext {
     }
 
     /**
-     * @return The marshalled request. See {@link Request#addHandlerContext(HandlerContextKey, Object)} for a mechanism to store
-     *     request level state across invocations of the retry policy.
+     * @return The marshalled request.
      */
     public SdkHttpFullRequest request() {
         return this.request;
@@ -70,6 +73,13 @@ public class RetryPolicyContext {
      */
     public SdkBaseException exception() {
         return this.exception;
+    }
+
+    /**
+     * @return Mutable execution context.
+     */
+    public ExecutionContext executionContext() {
+        return this.executionContext;
     }
 
     /**
@@ -99,6 +109,7 @@ public class RetryPolicyContext {
         private Object originalRequest;
         private SdkHttpFullRequest request;
         private SdkBaseException exception;
+        private ExecutionContext executionContext;
         private int retriesAttempted;
         private Integer httpStatusCode;
 
@@ -120,6 +131,11 @@ public class RetryPolicyContext {
             return this;
         }
 
+        public Builder executionContext(ExecutionContext executionContext) {
+            this.executionContext = executionContext;
+            return this;
+        }
+
         public Builder retriesAttempted(int retriesAttempted) {
             this.retriesAttempted = retriesAttempted;
             return this;
@@ -131,7 +147,12 @@ public class RetryPolicyContext {
         }
 
         public RetryPolicyContext build() {
-            return new RetryPolicyContext(originalRequest, request, exception, retriesAttempted, httpStatusCode);
+            return new RetryPolicyContext(originalRequest,
+                                          request,
+                                          exception,
+                                          executionContext,
+                                          retriesAttempted,
+                                          httpStatusCode);
         }
 
     }

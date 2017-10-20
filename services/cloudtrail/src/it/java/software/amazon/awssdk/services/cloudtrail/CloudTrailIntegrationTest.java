@@ -24,6 +24,7 @@ import static software.amazon.awssdk.testutils.service.S3BucketUtils.temporaryBu
 import java.io.IOException;
 import java.util.Iterator;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.BasicConfigurator;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
