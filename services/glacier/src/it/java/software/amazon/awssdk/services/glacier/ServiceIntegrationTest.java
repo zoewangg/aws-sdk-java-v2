@@ -17,6 +17,8 @@ package software.amazon.awssdk.services.glacier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.File;
+import java.io.IOException;
 import org.assertj.core.api.Condition;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,8 +26,12 @@ import software.amazon.awssdk.core.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.interceptor.Context;
 import software.amazon.awssdk.core.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.core.interceptor.ExecutionInterceptor;
+import software.amazon.awssdk.core.regions.Region;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.services.glacier.model.ListVaultsRequest;
+import software.amazon.awssdk.services.glacier.model.UploadArchiveRequest;
+import software.amazon.awssdk.testutils.RandomTempFile;
 import software.amazon.awssdk.testutils.service.AwsIntegrationTestBase;
 
 public class ServiceIntegrationTest extends AwsIntegrationTestBase {
@@ -38,6 +44,7 @@ public class ServiceIntegrationTest extends AwsIntegrationTestBase {
     public void setup() {
         client = GlacierClient.builder()
                               .credentialsProvider(getCredentialsProvider())
+                              .region(Region.US_EAST_1)
                               .overrideConfiguration(ClientOverrideConfiguration
                                                              .builder()
                                                              .addLastExecutionInterceptor(capturingExecutionInterceptor)
@@ -57,6 +64,15 @@ public class ServiceIntegrationTest extends AwsIntegrationTestBase {
                                           .orElseThrow(() -> new AssertionError("x-amz-glacier-version header not found"))
                                           .equals("2012-06-01"),
                                     "Glacier API version is present in header"));
+    }
+
+    @Test
+    public void upload() throws IOException {
+        client.uploadArchive(UploadArchiveRequest.builder()
+                                                 .accountId("accountId12345")
+                                                 .vaultName("valultNmae2323")
+                                                 .archiveDescription("asdfsdf").build(), RequestBody.of(new RandomTempFile("test.txt", 29)));
+
     }
 
     public static class CapturingExecutionInterceptor implements ExecutionInterceptor {

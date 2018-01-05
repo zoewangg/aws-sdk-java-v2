@@ -29,7 +29,7 @@ import software.amazon.awssdk.utils.IoUtils;
 public abstract class AwsIntegrationTestBase {
 
     /** Default Properties Credentials file path. */
-    private static final String TEST_CREDENTIALS_PROFILE_NAME = "aws-test-account";
+    private static final String TEST_CREDENTIALS_PROFILE_NAME = "zoe";
 
     public static final AwsCredentialsProviderChain CREDENTIALS_PROVIDER_CHAIN =
         AwsCredentialsProviderChain.builder()

@@ -59,7 +59,7 @@ public class GetObjectAsyncIntegrationTest extends S3IntegrationTestBase {
     @BeforeClass
     public static void setupFixture() throws IOException {
         createBucket(BUCKET);
-        file = new RandomTempFile(10_000);
+        file = new RandomTempFile(10);
         s3Async.putObject(PutObjectRequest.builder()
                                           .bucket(BUCKET)
                                           .key(KEY)
@@ -68,7 +68,7 @@ public class GetObjectAsyncIntegrationTest extends S3IntegrationTestBase {
 
     @AfterClass
     public static void tearDownFixture() {
-        deleteBucketAndAllContents(BUCKET);
+        //deleteBucketAndAllContents(BUCKET);
         file.delete();
     }
 

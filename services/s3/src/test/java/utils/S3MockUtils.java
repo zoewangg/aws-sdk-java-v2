@@ -19,6 +19,9 @@ import java.io.UnsupportedEncodingException;
 import software.amazon.awssdk.core.util.StringInputStream;
 import software.amazon.awssdk.http.AbortableInputStream;
 import software.amazon.awssdk.http.SdkHttpFullResponse;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.UploadPartRequest;
 
 /**
  * Various utility methods for mocking the S3Client at the HTTP layer.
@@ -74,5 +77,17 @@ public final class S3MockUtils {
                                           "  </Buckets>\n" +
                                           "</ListAllMyBucketsResult>"), () -> { }))
                                   .build();
+    }
+
+    public static GetObjectRequest newGetObjectRequest() {
+        return GetObjectRequest.builder().bucket("bucket").key("test").build();
+    }
+
+    public static PutObjectRequest newPutObjectRequest() {
+        return PutObjectRequest.builder().bucket("bucket").key("test").build();
+    }
+
+    public static UploadPartRequest newUploadPartRequest() {
+        return UploadPartRequest.builder().bucket("bucket").key("test").build();
     }
 }

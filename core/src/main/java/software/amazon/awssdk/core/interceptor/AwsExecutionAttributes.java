@@ -15,6 +15,7 @@
 
 package software.amazon.awssdk.core.interceptor;
 
+import java.security.MessageDigest;
 import software.amazon.awssdk.annotations.ReviewBeforeRelease;
 import software.amazon.awssdk.core.SdkRequestOverrideConfig;
 import software.amazon.awssdk.core.ServiceAdvancedConfiguration;
@@ -64,6 +65,11 @@ public final class AwsExecutionAttributes {
      */
     public static final ExecutionAttribute<ServiceAdvancedConfiguration> SERVICE_ADVANCED_CONFIG =
             new ExecutionAttribute<>("ServiceAdvancedConfig");
+
+    /**
+     * The key under which the message digest of the request is stored.
+     */
+    public static final ExecutionAttribute<MessageDigest> MESSAGE_DIGEST = new ExecutionAttribute<>("MessageDigest");
 
     private AwsExecutionAttributes() {
     }

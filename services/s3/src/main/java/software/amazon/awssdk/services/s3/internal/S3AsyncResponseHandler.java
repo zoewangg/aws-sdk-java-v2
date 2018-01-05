@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2010-2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.awssdk.core.async;
+package software.amazon.awssdk.services.s3.internal;
 
 import static software.amazon.awssdk.utils.FunctionalUtils.invokeSafely;
 
@@ -22,42 +22,44 @@ import java.nio.ByteBuffer;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import software.amazon.awssdk.annotations.SdkInternalApi;
+import software.amazon.awssdk.core.async.AsyncResponseHandler;
 import software.amazon.awssdk.utils.BinaryUtils;
 
 /**
- * Implementation of {@link AsyncResponseHandler} that dumps content into a byte array.
+ * S3 Callback interface to handle a streaming asynchronous response.
  *
- * @param <ResponseT> Pojo response type.
+ * @param <ResponseT> POJO response type.
+ * @param <ReturnT>   Type this response handler produces. I.E. the type you are transforming the response into.
  */
-@SdkInternalApi
-class ByteArrayAsyncResponseHandler<ResponseT> implements AsyncResponseHandler<ResponseT, byte[]> {
+public class S3AsyncResponseHandler<ResponseT, ReturnT> implements AsyncResponseHandler<ResponseT, ReturnT> {
 
     private ByteArrayOutputStream baos;
 
+    private AsyncResponseHandler<ResponseT, ReturnT> asyncResponseHandler;
+
+    public S3AsyncResponseHandler(AsyncResponseHandler asyncResponseHandler) {
+        this.asyncResponseHandler = asyncResponseHandler;
+    }
 
     @Override
     public void responseReceived(ResponseT response) {
+        asyncResponseHandler.responseReceived(response);
+    }
+
+    @Override
+    public void exceptionOccurred(Throwable throwable) {
+        asyncResponseHandler.exceptionOccurred(throwable);
+    }
+
+    @Override
+    public ReturnT complete() {
+        return asyncResponseHandler.complete();
     }
 
     @Override
     public void onStream(Publisher<ByteBuffer> publisher) {
         baos = new ByteArrayOutputStream();
         publisher.subscribe(new BaosSubscriber());
-    }
-
-    @Override
-    public void exceptionOccurred(Throwable throwable) {
-        baos = null;
-    }
-
-    @Override
-    public byte[] complete() {
-        try {
-            return baos.toByteArray();
-        } finally {
-            baos = null;
-        }
     }
 
     /**

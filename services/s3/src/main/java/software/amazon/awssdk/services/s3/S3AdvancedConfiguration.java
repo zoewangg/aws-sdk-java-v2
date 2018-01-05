@@ -19,6 +19,7 @@ import software.amazon.awssdk.annotations.Immutable;
 import software.amazon.awssdk.annotations.NotThreadSafe;
 import software.amazon.awssdk.annotations.ThreadSafe;
 import software.amazon.awssdk.core.ServiceAdvancedConfiguration;
+import software.amazon.awssdk.http.Headers;
 import software.amazon.awssdk.services.s3.model.PutBucketAccelerateConfigurationRequest;
 import software.amazon.awssdk.utils.builder.CopyableBuilder;
 import software.amazon.awssdk.utils.builder.ToCopyableBuilder;
@@ -44,14 +45,29 @@ public final class S3AdvancedConfiguration implements
      */
     private static final boolean DEFAULT_DUALSTACK_ENABLED = false;
 
+    /**
+     * S3 server side MD5 checksum validation is by default enabled.
+     */
+    private static final boolean DEFAULT_SERVER_SIDE_MD5_VALIDATION_ENABLED = true;
+
+    /**
+     * S3 client side MD5 checksum validation is by default enabled.
+     */
+    private static final boolean DEFAULT_CLIENT_SIDE_MD5_VALIDATION_ENABLED = true;
+
     private final Boolean pathStyleAccessEnabled;
     private final Boolean accelerateModeEnabled;
     private final Boolean dualstackEnabled;
+    private final Boolean clientSideMd5ValidationEnabled;
+    private final Boolean serverSideMd5ValidationEnabled;
+
 
     private S3AdvancedConfiguration(DefaultS3AdvancedConfigurationBuilder builder) {
         this.dualstackEnabled = resolveBoolean(builder.dualstackEnabled, DEFAULT_DUALSTACK_ENABLED);
         this.accelerateModeEnabled = resolveBoolean(builder.accelerateModeEnabled, DEFAULT_ACCELERATE_MODE_ENABLED);
         this.pathStyleAccessEnabled = resolveBoolean(builder.pathStyleAccessEnabled, DEFAULT_PATH_STYLE_ACCESS_ENABLED);
+        this.clientSideMd5ValidationEnabled = resolveBoolean(builder.clientSideMd5ValidationEnabled, DEFAULT_CLIENT_SIDE_MD5_VALIDATION_ENABLED);
+        this.serverSideMd5ValidationEnabled = resolveBoolean(builder.serverSideMd5ValidationEnabled, DEFAULT_SERVER_SIDE_MD5_VALIDATION_ENABLED);
         if (accelerateModeEnabled && pathStyleAccessEnabled) {
             throw new IllegalArgumentException("Accelerate mode cannot be used with path style addressing");
         }
@@ -120,6 +136,29 @@ public final class S3AdvancedConfiguration implements
         return dualstackEnabled;
     }
 
+    /**
+     * <p>
+     * Returns whether to do client side validation on both the request and the response.
+     * </p>
+     *
+     * @return True is client side MD5 validation is enabled
+     */
+    public boolean clientSideMd5ValidationEnabled() {
+        return clientSideMd5ValidationEnabled;
+    }
+
+    /**
+     * <p>
+     * Returns whether the client should calculate and send the {@link Headers#CONTENT_MD5}
+     * header to be validated by S3 per the request.
+     * </p>
+     *
+     * @return True is server side MD5 validation is enabled
+     */
+    public boolean serverSideMd5ValidationEnabled() {
+        return serverSideMd5ValidationEnabled;
+    }
+
     private boolean resolveBoolean(Boolean customerSuppliedValue, boolean defaultValue) {
         return customerSuppliedValue == null ? defaultValue : customerSuppliedValue;
     }
@@ -172,6 +211,28 @@ public final class S3AdvancedConfiguration implements
          * @see S3AdvancedConfiguration#pathStyleAccessEnabled().
          */
         Builder pathStyleAccessEnabled(Boolean pathStyleAccessEnabled);
+
+        /**
+         * Option to enable client side MD5 validation for uploading and downloading S3 objects.
+         *
+         * <p>
+         * Client side MD5 validation is enabled by default.
+         * </p>
+         *
+         * @see S3AdvancedConfiguration#clientSideMd5ValidationEnabled().
+         */
+        Builder clientSideMd5ValidationEnabled(Boolean clientSideMd5ValidationEnabled);
+
+        /**
+         * Option to enable server side MD5 validation for uploading and downloading S3 objects.
+         *
+         * <p>
+         * Server side MD5 validation is enabled by default.
+         * </p>
+         *
+         * @see S3AdvancedConfiguration#clientSideMd5ValidationEnabled().
+         */
+        Builder serverSideMd5ValidationEnabled(Boolean serverSideMd5ValidationEnabled);
     }
 
     private static final class DefaultS3AdvancedConfigurationBuilder implements Builder {
@@ -179,6 +240,8 @@ public final class S3AdvancedConfiguration implements
         private Boolean dualstackEnabled;
         private Boolean accelerateModeEnabled;
         private Boolean pathStyleAccessEnabled;
+        private Boolean clientSideMd5ValidationEnabled;
+        private Boolean serverSideMd5ValidationEnabled;
 
         public Builder dualstackEnabled(Boolean dualstackEnabled) {
             this.dualstackEnabled = dualstackEnabled;
@@ -205,6 +268,24 @@ public final class S3AdvancedConfiguration implements
 
         public void setPathStyleAccessEnabled(Boolean pathStyleAccessEnabled) {
             pathStyleAccessEnabled(pathStyleAccessEnabled);
+        }
+
+        public Builder clientSideMd5ValidationEnabled(Boolean clientSideMd5ValidationEnabled) {
+            this.clientSideMd5ValidationEnabled = clientSideMd5ValidationEnabled;
+            return this;
+        }
+
+        public void setClientSideMd5ValidationEnabled(Boolean clientSideMd5ValidationEnabled) {
+            clientSideMd5ValidationEnabled(clientSideMd5ValidationEnabled);
+        }
+
+        public Builder serverSideMd5ValidationEnabled(Boolean serverSideMd5ValidationEnabled) {
+            this.serverSideMd5ValidationEnabled = serverSideMd5ValidationEnabled;
+            return this;
+        }
+
+        public void setServerSideMd5ValidationEnabled(Boolean serverSideMd5ValidationEnabled) {
+            serverSideMd5ValidationEnabled(serverSideMd5ValidationEnabled);
         }
 
         public S3AdvancedConfiguration build() {

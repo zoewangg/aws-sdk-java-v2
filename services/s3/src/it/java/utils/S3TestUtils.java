@@ -29,6 +29,7 @@ import software.amazon.awssdk.services.s3.model.ListObjectVersionsRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectVersionsResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsResponse;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.utils.BinaryUtils;
 import software.amazon.awssdk.utils.IoUtils;
@@ -83,16 +84,24 @@ public class S3TestUtils {
     }
 
     public static void assertMd5MatchesEtag(InputStream content, GetObjectResponse response) throws Exception {
+        assertMd5MatchesEtag(content, response.eTag());
+    }
+
+    public static void assertMd5MatchesEtag(InputStream content, PutObjectResponse response) throws Exception {
+        assertMd5MatchesEtag(content, response.eTag());
+    }
+
+    public static void assertMd5MatchesEtag(InputStream content, String etag) throws Exception {
         MessageDigest md = MessageDigest.getInstance("MD5");
         try (InputStream is = new DigestInputStream(content, md)) {
             IoUtils.drainInputStream(is);
         }
-        byte[] expectedMd5 = BinaryUtils.fromHex(response.eTag().replace("\"", ""));
+        byte[] expectedMd5 = BinaryUtils.fromHex(etag.replace("\"", ""));
         byte[] calculatedMd5 = md.digest();
         if (!Arrays.equals(expectedMd5, calculatedMd5)) {
             throw new AssertionError(
-                    String.format("Content malformed. Expected checksum was %s but calculated checksum was %s",
-                                  BinaryUtils.toBase64(expectedMd5), BinaryUtils.toBase64(calculatedMd5)));
+                String.format("Content malformed. Expected checksum was %s but calculated checksum was %s",
+                              BinaryUtils.toBase64(expectedMd5), BinaryUtils.toBase64(calculatedMd5)));
         }
     }
 }
