@@ -300,7 +300,7 @@ class AsyncClientHandlerImpl extends AsyncClientHandler {
             try {
                 // TODO would be better to pass in AwsExecutionAttributes to the async response handler so we can
                 // provide them to HttpResponseHandler
-                OutputT resp = interceptorCalling(responseHandler, executionContext).handle(httpResponse, null);
+                OutputT resp = interceptorCalling(responseHandler, executionContext).handle(httpResponse, executionContext.executionAttributes());
                 asyncResponseHandler.responseReceived(resp);
             } catch (Exception e) {
                 throw Throwables.failure(e);

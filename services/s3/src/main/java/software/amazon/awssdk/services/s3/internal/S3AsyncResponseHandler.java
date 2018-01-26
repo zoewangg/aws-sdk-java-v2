@@ -31,64 +31,66 @@ import software.amazon.awssdk.utils.BinaryUtils;
  * @param <ResponseT> POJO response type.
  * @param <ReturnT>   Type this response handler produces. I.E. the type you are transforming the response into.
  */
-public class S3AsyncResponseHandler<ResponseT, ReturnT> implements AsyncResponseHandler<ResponseT, ReturnT> {
+public interface S3AsyncResponseHandler<ResponseT, ReturnT> extends AsyncResponseHandler<ResponseT, ReturnT> {
 
-    private ByteArrayOutputStream baos;
 
-    private AsyncResponseHandler<ResponseT, ReturnT> asyncResponseHandler;
 
-    public S3AsyncResponseHandler(AsyncResponseHandler asyncResponseHandler) {
-        this.asyncResponseHandler = asyncResponseHandler;
-    }
+//    private ByteArrayOutputStream baos;
+//
+//    private AsyncResponseHandler<ResponseT, ReturnT> asyncResponseHandler;
+//
+//    public S3AsyncResponseHandler(AsyncResponseHandler asyncResponseHandler) {
+//        this.asyncResponseHandler = asyncResponseHandler;
+//    }
+//
+//    @Override
+//    public void responseReceived(ResponseT response) {
+//        asyncResponseHandler.responseReceived(response);
+//    }
+//
+//    @Override
+//    public void exceptionOccurred(Throwable throwable) {
+//        asyncResponseHandler.exceptionOccurred(throwable);
+//    }
+//
+//    @Override
+//    public ReturnT complete() {
+//        return asyncResponseHandler.complete();
+//    }
+//
+//    @Override
+//    public void onStream(Publisher<ByteBuffer> publisher) {
+//        baos = new ByteArrayOutputStream();
+//        publisher.subscribe(new BaosSubscriber());
+//    }
 
-    @Override
-    public void responseReceived(ResponseT response) {
-        asyncResponseHandler.responseReceived(response);
-    }
-
-    @Override
-    public void exceptionOccurred(Throwable throwable) {
-        asyncResponseHandler.exceptionOccurred(throwable);
-    }
-
-    @Override
-    public ReturnT complete() {
-        return asyncResponseHandler.complete();
-    }
-
-    @Override
-    public void onStream(Publisher<ByteBuffer> publisher) {
-        baos = new ByteArrayOutputStream();
-        publisher.subscribe(new BaosSubscriber());
-    }
-
-    /**
-     * Requests chunks sequentially and dumps them into a {@link ByteArrayOutputStream}.
-     */
-    private class BaosSubscriber implements Subscriber<ByteBuffer> {
-
-        private Subscription subscription;
-
-        @Override
-        public void onSubscribe(Subscription s) {
-            this.subscription = s;
-            subscription.request(1);
-        }
-
-        @Override
-        public void onNext(ByteBuffer byteBuffer) {
-            invokeSafely(() -> baos.write(BinaryUtils.copyBytesFrom(byteBuffer)));
-            subscription.request(1);
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-            // Handled by response handler
-        }
-
-        @Override
-        public void onComplete() {
-            // Handled by response handler
-        }
-    }
+//    /**
+//     * Requests chunks sequentially and dumps them into a {@link ByteArrayOutputStream}.
+//     */
+//    private class BaosSubscriber implements Subscriber<ByteBuffer> {
+//
+//        private Subscription subscription;
+//
+//        @Override
+//        public void onSubscribe(Subscription s) {
+//            this.subscription = s;
+//            subscription.request(1);
+//        }
+//
+//        @Override
+//        public void onNext(ByteBuffer byteBuffer) {
+//            invokeSafely(() -> baos.write(BinaryUtils.copyBytesFrom(byteBuffer)));
+//            subscription.request(1);
+//        }
+//
+//        @Override
+//        public void onError(Throwable throwable) {
+//            // Handled by response handler
+//        }
+//
+//        @Override
+//        public void onComplete() {
+//            // Handled by response handler
+//        }
+//    }
 }

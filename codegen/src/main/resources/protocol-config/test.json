@@ -1,0 +1,110 @@
+{
+  "json": {
+    "modelMarshaller": {
+      "mainTemplate": "/templates/json/ModelMarshaller.ftl",
+      "childTemplates": [
+        {
+          "location": "/macros/marshaller/json/DefaultValueSupplierMacro.ftl",
+          "importAsNamespace": "DefaultValueSupplierMacro"
+        }
+      ]
+    },
+    "requestMarshaller": {
+      "mainTemplate" : "/templates/json/RequestMarshaller.ftl",
+      "childTemplates" : [
+      ]
+    }
+  },
+
+  "rest-json": {
+    "modelMarshaller": {
+      "mainTemplate": "/templates/json/ModelMarshaller.ftl",
+      "childTemplates": [
+        {
+          "location": "/macros/marshaller/json/DefaultValueSupplierMacro.ftl",
+          "importAsNamespace": "DefaultValueSupplierMacro"
+        }
+      ]
+    },
+    "requestMarshaller": {
+      "mainTemplate" : "/templates/json/RequestMarshaller.ftl"
+    }
+  },
+
+  "api-gateway": {
+    "modelMarshaller": {
+      "mainTemplate": "/templates/json/ModelMarshaller.ftl",
+      "childTemplates": [
+        {
+          "location": "/macros/marshaller/json/DefaultValueSupplierMacro.ftl",
+          "importAsNamespace": "DefaultValueSupplierMacro"
+        }
+      ]
+    }
+  },
+
+
+  "query": {
+    "modelMarshaller": {
+      "mainTemplate": "/templates/query/request-marshaller.ftl",
+      "childTemplates": [
+        {
+          "location": "/macros/marshaller/query/MemberMarshallerMacro.ftl",
+          "importAsNamespace": "MemberMarshallerMacro"
+        },
+        {
+          "location": "/macros/marshaller/common/IdempotencyTokenMacro.ftl",
+          "importAsNamespace": "IdempotencyTokenMacro"
+        }
+      ]
+    }
+  },
+
+  "rest-xml": {
+    "modelMarshaller": {
+      "mainTemplate": "/templates/rest-xml/request-marshaller.ftl",
+      "childTemplates": [
+        {
+          "location": "/macros/marshaller/rest/MarshalHeaderMembersMacro.ftl",
+          "importAsNamespace": "MarshalHeaderMembersMacro"
+        },
+        {
+          "location": "/macros/marshaller/rest-xml/MemberMarshallerMacro.ftl",
+          "importAsNamespace": "MemberMarshallerMacro"
+        },
+        {
+          "location": "/macros/marshaller/rest/UriMemberMarshallerMacro.ftl",
+          "importAsNamespace": "UriMemberMarshallerMacro"
+        },
+        {
+          "location": "/macros/marshaller/rest/UriGetMemberMarshallerMacro.ftl",
+          "importAsNamespace": "UriGetMemberMarshallerMacro"
+        },
+        {
+          "location": "/macros/marshaller/rest/QueryStringMemberMarshallerMacro.ftl",
+          "importAsNamespace": "QueryStringMemberMarshallerMacro"
+        },
+        {
+          "location": "/macros/marshaller/common/IdempotencyTokenMacro.ftl",
+          "importAsNamespace": "IdempotencyTokenMacro"
+        }
+      ]
+    }
+  },
+
+  "ec2": {
+    "modelMarshaller": {
+      "mainTemplate": "/templates/query/request-marshaller.ftl",
+      "childTemplates": [
+        {
+          "location": "/macros/marshaller/ec2/MemberMarshallerMacro.ftl",
+          "importAsNamespace": "MemberMarshallerMacro"
+        },
+        {
+          "location": "/macros/marshaller/common/IdempotencyTokenMacro.ftl",
+          "importAsNamespace": "IdempotencyTokenMacro"
+        }
+      ]
+    }
+  }
+}
