@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2010-2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import software.amazon.awssdk.core.auth.AwsCredentialsProvider;
 import software.amazon.awssdk.services.sts.STSClient;
 import software.amazon.awssdk.services.sts.model.Credentials;
 import software.amazon.awssdk.services.sts.model.GetFederationTokenRequest;
+import software.amazon.awssdk.utils.ToString;
 import software.amazon.awssdk.utils.Validate;
 
 /**
@@ -60,6 +61,13 @@ public class StsGetFederationTokenCredentialsProvider extends StsCredentialsProv
     @Override
     protected Credentials getUpdatedCredentials(STSClient stsClient) {
         return stsClient.getFederationToken(getFederationTokenRequest).credentials();
+    }
+
+    @Override
+    public String toString() {
+        return ToString.builder("StsGetFederationTokenCredentialsProvider")
+                       .add("refreshRequest", getFederationTokenRequest)
+                       .build();
     }
 
     /**
