@@ -52,6 +52,22 @@ public final class IoUtils {
         }
     }
 
+    public static byte[] exactRange(InputStream is, int index, int length) throws IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try {
+            byte[] b = new byte[BUFFER_SIZE];
+            int n = 0;
+
+            is.read(b, index, length);
+            while ((n = is.read(b)) != -1) {
+                output.write(b, 0, n);
+            }
+            return output.toByteArray();
+        } finally {
+            output.close();
+        }
+    }
+
     /**
      * Reads and returns the rest of the given input stream as a string.
      * Caller is responsible for closing the given input stream.

@@ -13,16 +13,19 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.awssdk.core.async;
+package software.amazon.awssdk.services.s3.internal;
 
 import static software.amazon.awssdk.utils.FunctionalUtils.invokeSafely;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import software.amazon.awssdk.annotations.SdkInternalApi;
+import software.amazon.awssdk.core.SdkResponse;
+import software.amazon.awssdk.core.async.AsyncResponseHandler;
 import software.amazon.awssdk.utils.BinaryUtils;
 
 /**
@@ -31,13 +34,15 @@ import software.amazon.awssdk.utils.BinaryUtils;
  * @param <ResponseT> Pojo response type.
  */
 @SdkInternalApi
-class ByteArrayAsyncResponseHandler<ResponseT> implements AsyncResponseHandler<ResponseT, byte[]> {
+class S3ByteArrayAsyncResponseHandler<ResponseT> implements AsyncResponseHandler<ResponseT, byte[]> {
 
     private ByteArrayOutputStream baos;
-
+    private Subscriber<ByteBuffer> subscriber;
 
     @Override
     public void responseReceived(ResponseT response) {
+        System.out.println("response received" + response);
+
     }
 
     @Override
@@ -75,7 +80,23 @@ class ByteArrayAsyncResponseHandler<ResponseT> implements AsyncResponseHandler<R
 
         @Override
         public void onNext(ByteBuffer byteBuffer) {
-            invokeSafely(() -> baos.write(BinaryUtils.copyBytesFrom(byteBuffer)));
+
+            final byte[] bytes = BinaryUtils.copyBytesFrom(byteBuffer);
+
+            //            if (bytes.length > 8092) {
+            //                invokeSafely(() -> baos.write(bytes));
+            //                subscription.request(1);
+            //            }
+
+
+            System.out.println("all length: " + bytes.length);
+            final byte[] trailingChecksum = Arrays.copyOfRange(bytes, bytes.length - 16, bytes.length);
+
+            byte[] content = Arrays.copyOfRange(bytes, 0, bytes.length - 16);
+
+            System.out.println("Content length: " + content.length);
+
+            invokeSafely(() -> baos.write(bytes));
             subscription.request(1);
         }
 

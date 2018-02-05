@@ -38,6 +38,8 @@ import software.amazon.awssdk.core.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.core.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.core.util.ImmutableMapParameter;
 import software.amazon.awssdk.http.async.SimpleSubscriber;
+import software.amazon.awssdk.services.s3.internal.S3AsyncResponseHandler;
+import software.amazon.awssdk.services.s3.internal.S3AsyncResponseHandler1;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -59,7 +61,7 @@ public class GetObjectAsyncIntegrationTest extends S3IntegrationTestBase {
     @BeforeClass
     public static void setupFixture() throws IOException {
         createBucket(BUCKET);
-        file = new RandomTempFile(10_000);
+        file = new RandomTempFile(10);
         s3Async.putObject(PutObjectRequest.builder()
                                           .bucket(BUCKET)
                                           .key(KEY)
@@ -91,7 +93,8 @@ public class GetObjectAsyncIntegrationTest extends S3IntegrationTestBase {
 
     @Test
     public void toByteArray() throws IOException {
-        byte[] returned = s3Async.getObject(getObjectRequest, AsyncResponseHandler.toByteArray()).join();
+        byte[] returned = s3Async.getObject(getObjectRequest, S3AsyncResponseHandler1.toByteArray()).join();
+        System.out.println("length" + returned.length);
         assertThat(returned).isEqualTo(Files.readAllBytes(file.toPath()));
     }
 

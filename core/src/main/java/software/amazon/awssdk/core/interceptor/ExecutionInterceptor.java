@@ -205,7 +205,7 @@ public interface ExecutionInterceptor {
     }
 
     /**
-     * Modify the {@link SdkHttpFullRequest} before it is unmarshalled into an {@link SdkResponse}.
+     * Modify the {@link SdkHttpFullResponse} before it is unmarshalled into an {@link SdkResponse}.
      *
      * <p>Note: Unlike many other lifecycle methods, this one may be invoked multiple times. If the {@link RetryPolicy} determines
      * the error code returned by the service is retriable, this will be invoked for each response returned by the service.</p>
