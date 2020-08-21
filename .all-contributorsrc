@@ -1,0 +1,24 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "zoewangg",
+      "name": "Zoe Wang",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/33073555?v=4",
+      "profile": "https://github.com/zoewangg",
+      "contributions": [
+        "design"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "aws-sdk-java-v2",
+  "projectOwner": "zoewangg",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}

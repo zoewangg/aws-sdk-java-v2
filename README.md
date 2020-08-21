@@ -1,4 +1,7 @@
 # AWS SDK for Java 2.0 Developer Preview [![Build Status](https://travis-ci.org/aws/aws-sdk-java-v2.svg?branch=master)](https://travis-ci.org/aws/aws-sdk-java-v2)
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 The **AWS SDK for Java 2.0 Developer Preview** is a rewrite of 1.0 with some great new features. As with version 1.0,
 it enables you to easily work with [Amazon Web Services][aws] but also includes features like non-blocking IO and pluggable
@@ -141,3 +144,22 @@ We need your help in making this SDK great. Please participate in the community 
 [support-center]: https://console.aws.amazon.com/support/
 [console]: https://console.aws.amazon.com
 [bom]: http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22software.amazon.awssdk%22%20AND%20a%3A%22bom%22
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/zoewangg"><img src="https://avatars3.githubusercontent.com/u/33073555?v=4" width="100px;" alt=""/><br /><sub><b>Zoe Wang</b></sub></a><br /><a href="#design-zoewangg" title="Design">🎨</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
