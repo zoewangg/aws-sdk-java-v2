@@ -10,9 +10,6 @@ jobs:
     if: github.repository == 'aws/aws-sdk-java-v2'
     name: Stale issue job
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
     steps:
     - uses: aws-actions/stale-issue-cleanup@v4
       with:
